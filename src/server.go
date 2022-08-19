@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -9,18 +8,14 @@ import (
 	"github.com/rs/cors"
 )
 
-func getFunc() {
-	return 1
-}
-
 func main() {
-	fmt.Println("Hello World")
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/test", getFunc).Methods("GET")
+	//router.HandleFunc("/test", handlers.GetFunc).Methods("GET")
 
 	handler := cors.Default().Handler(router)
 
 	log.Fatal(http.ListenAndServe(":5000", handler))
+
 }
