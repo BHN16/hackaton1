@@ -24,7 +24,7 @@ func main() {
 
 	handler := cors.Default().Handler(router)
 
-	log.Fatal(http.ListenAndServe(":5000", handler))
+	log.Fatal(http.ListenAndServe(":80", handler))
 
 	defer bd.DB.Close()
 
