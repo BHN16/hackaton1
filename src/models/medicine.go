@@ -2,10 +2,8 @@ package models
 
 import "github.com/jinzhu/gorm"
 
-type Mecine struct {
+type Medicine struct {
 	gorm.Model
-
-	MedicineId string `json:"MedicineId"`
 
 	Name string `json:"Name"`
 }

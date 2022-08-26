@@ -1,6 +1,8 @@
 package main
 
 import (
+	"hackaton/bd"
+	"hackaton/handlers"
 	"log"
 	"net/http"
 
@@ -12,10 +14,18 @@ func main() {
 
 	router := mux.NewRouter()
 
-	//router.HandleFunc("/test", handlers.GetFunc).Methods("GET")
+	bd.Connect()
+
+	router.HandleFunc("/employees", handlers.GetEmployees).Methods("GET")
+
+	router.HandleFunc("/employee/{id}", handlers.GetEmployee).Methods("GET")
+
+	router.HandleFunc("/employee", handlers.PostEmployee).Methods("POST")
 
 	handler := cors.Default().Handler(router)
 
 	log.Fatal(http.ListenAndServe(":5000", handler))
+
+	defer bd.DB.Close()
 
 }
