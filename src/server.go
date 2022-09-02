@@ -37,9 +37,13 @@ func main() {
 
 	router.HandleFunc("/patient", handlers.PostPatient).Methods("POST")
 
+	router.HandleFunc("/admin", handlers.GetAdmin).Methods("GET")
+
+	router.HandleFunc("/admin", handlers.PostAdmin).Methods("POST")
+
 	handler := cors.Default().Handler(router)
 
-	log.Fatal(http.ListenAndServe("10.182.0.4:8080", handler))
+	log.Fatal(http.ListenAndServe("34.125.96.41:8080", handler))
 
 	defer bd.DB.Close()
 
