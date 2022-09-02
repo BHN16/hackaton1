@@ -41,9 +41,11 @@ func main() {
 
 	router.HandleFunc("/admin", handlers.PostAdmin).Methods("POST")
 
+	router.HandleFunc("/login", handlers.Login).Methods("POST")
+
 	handler := cors.Default().Handler(router)
 
-	log.Fatal(http.ListenAndServe("34.125.96.41:8080", handler))
+	log.Fatal(http.ListenAndServe("0.0.0.0:8080", handler))
 
 	defer bd.DB.Close()
 

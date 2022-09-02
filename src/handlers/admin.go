@@ -22,6 +22,8 @@ func PostAdmin(w http.ResponseWriter, r *http.Request) {
 	var admin models.Admin
 	err := json.NewDecoder(r.Body).Decode(&admin)
 
+	admin.Password = hashAndSalt(admin.Password)
+
 	if err != nil {
 		http.Error(w, "Error en los datos recibidos"+err.Error(), 400)
 		return
