@@ -22,9 +22,21 @@ func main() {
 
 	router.HandleFunc("/employee", handlers.PostEmployee).Methods("POST")
 
+	router.HandleFunc("/medicines", handlers.GetMedicines).Methods("GET")
+
+	router.HandleFunc("/medicine/{id}", handlers.GetMedicine).Methods("GET")
+
+	router.HandleFunc("/medicine", handlers.PostMedicine).Methods("POST")
+
+	router.HandleFunc("/patients", handlers.GetPatients).Methods("GET")
+
+	router.HandleFunc("/patient/{id}", handlers.GetPatient).Methods("GET")
+
+	router.HandleFunc("/patient", handlers.PostPatient).Methods("POST")
+
 	handler := cors.Default().Handler(router)
 
-	log.Fatal(http.ListenAndServe(":80", handler))
+	log.Fatal(http.ListenAndServe(":5000", handler))
 
 	defer bd.DB.Close()
 
