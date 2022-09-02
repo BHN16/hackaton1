@@ -4,9 +4,13 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"log"
-
 	"golang.org/x/crypto/bcrypt"
+	passwordvalidator "github.com/wagslane/go-password-validator"
+
 )
+
+const minEntropy = 60
+
 
 func comparePasswords(hashedPwd string, plainPwd string) bool {
 	// Since we'll be getting the hashed password from the DB it
@@ -19,6 +23,19 @@ func comparePasswords(hashedPwd string, plainPwd string) bool {
 	}
 
 	return true
+}
+
+func validateEntropy(password string) error {
+	const minEntropy = 60
+
+	err2 := passwordvalidator.Validate(password, minEntropy)
+
+	if err2 != nil {
+		return err2
+	}
+
+	return nil
+
 }
 
 func hashAndSalt(pwd string) string {

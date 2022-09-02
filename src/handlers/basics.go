@@ -23,7 +23,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if admin.Name == cur_admin.Name && comparePasswords(admin.Password, cur_admin.Password) {
 		json.NewEncoder(w).Encode(map[string]bool{"response": true})
 	} else {
-		json.NewEncoder(w).Encode(map[string]bool{"response": false})
+		json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Username or Password"})
 	}
 
 }
