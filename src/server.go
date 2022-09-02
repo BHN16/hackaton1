@@ -5,7 +5,6 @@ import (
 	"hackaton/handlers"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -40,7 +39,7 @@ func main() {
 
 	handler := cors.Default().Handler(router)
 
-	log.Fatal(http.ListenAndServe(os.Getenv("PORT"), handler))
+	log.Fatal(http.ListenAndServe("10.182.0.4:8080", handler))
 
 	defer bd.DB.Close()
 
