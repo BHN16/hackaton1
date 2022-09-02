@@ -5,12 +5,16 @@ import (
 	"hackaton/handlers"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 )
 
 func main() {
+
+	godotenv.Load(".env")
 
 	router := mux.NewRouter()
 
@@ -36,7 +40,7 @@ func main() {
 
 	handler := cors.Default().Handler(router)
 
-	log.Fatal(http.ListenAndServe(":5000", handler))
+	log.Fatal(http.ListenAndServe(os.Getenv("PORT"), handler))
 
 	defer bd.DB.Close()
 
