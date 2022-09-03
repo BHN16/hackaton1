@@ -5,11 +5,11 @@ import (
 	"hackaton/handlers"
 	"log"
 	"net/http"
+
 	//"github.com/golang-jwt/jwt"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
-
 )
 
 func main() {
@@ -43,6 +43,8 @@ func main() {
 	router.HandleFunc("/admin", handlers.PostAdmin).Methods("POST")
 
 	router.HandleFunc("/login", handlers.Login).Methods("POST")
+
+	router.HandleFunc("/register", handlers.Register).Methods("POST")
 
 	handler := cors.Default().Handler(router)
 

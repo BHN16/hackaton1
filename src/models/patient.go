@@ -7,6 +7,9 @@ type Patient struct {
 
 	Name string `json:"Name"`
 
-	Role string `json:"Role"`
+	Email string `json:"Email"`
 
+	Password string `json:"Password"`
+
+	Role string `json:"Role"`
 }
