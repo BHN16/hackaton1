@@ -41,6 +41,15 @@ func PostEmployee(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err2 := validateEntropy(employee.Password)
+
+	if err2 != nil {
+		http.Error(w, err2.Error(), 400)
+		return
+	}
+
+	employee.Password = hashAndSalt(employee.Password)
+
 	bd.DB.AutoMigrate(&models.Employee{})
 
 	bd.DB.Create(&employee)

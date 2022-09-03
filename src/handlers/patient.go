@@ -41,6 +41,15 @@ func PostPatient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err2 := validateEntropy(patient.Password)
+
+	if err2 != nil {
+		http.Error(w, err2.Error(), 400)
+		return
+	}
+
+	patient.Password = hashAndSalt(patient.Password)
+
 	bd.DB.AutoMigrate(&models.Patient{})
 
 	bd.DB.Create(&patient)
