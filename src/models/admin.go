@@ -11,5 +11,4 @@ type Admin struct {
 
 	Password string `json:"Password"`
 
-	Role string `json:"Role"`
 }

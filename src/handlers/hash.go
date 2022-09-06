@@ -4,12 +4,40 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"log"
-
+	"os"
+	"time"
+	"fmt"
 	passwordvalidator "github.com/wagslane/go-password-validator"
 	"golang.org/x/crypto/bcrypt"
+	"github.com/joho/godotenv"
+	"github.com/golang-jwt/jwt"
 )
 
 const minEntropy = 60
+
+
+func GenerateJWT(email, role string) (string, error) {
+	godotenv.Load(".env")
+
+	var mySigningKey = []byte(os.Getenv("SECRET"))
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+
+	claims["Authorized"] = true
+	claims["Email"] = email
+	claims["Role"] = role
+	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
+
+	tokenString, err := token.SignedString(mySigningKey)
+
+
+
+	if err != nil {
+		fmt.Errorf("Something Went Wrong: %s", err.Error())
+		return "", err
+	}
+	return tokenString, nil
+}
 
 func comparePasswords(hashedPwd string, plainPwd string) bool {
 	byteHash := []byte(hashedPwd)

@@ -11,5 +11,5 @@ type Employee struct {
 
 	Password string `json:"Password"`
 
-	Role string `json:"Role"`
+	Codigo string `json:"Codigo"`
 }
