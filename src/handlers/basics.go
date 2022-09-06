@@ -132,6 +132,9 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
+	//Deserializar el Token, verificar si es admin. Si es admin tu puedes crear employee y patient
+
+
 	/*
 	switch user.Role {
 	case "Employee":
