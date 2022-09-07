@@ -20,4 +20,5 @@ func Connect() {
 	if ERR != nil {
 		panic("failed to connect database")
 	}
+
 }

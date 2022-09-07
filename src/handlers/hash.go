@@ -3,23 +3,24 @@ package handlers
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"log"
 	"os"
 	"time"
-	"fmt"
+
+	"github.com/golang-jwt/jwt"
+	"github.com/joho/godotenv"
 	passwordvalidator "github.com/wagslane/go-password-validator"
 	"golang.org/x/crypto/bcrypt"
-	"github.com/joho/godotenv"
-	"github.com/golang-jwt/jwt"
 )
 
 const minEntropy = 60
-
 
 func GenerateJWT(email, role string) (string, error) {
 	godotenv.Load(".env")
 
 	var mySigningKey = []byte(os.Getenv("SECRET"))
+	fmt.Print(os.Getenv("SECRET"))
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 
@@ -29,8 +30,6 @@ func GenerateJWT(email, role string) (string, error) {
 	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
 	tokenString, err := token.SignedString(mySigningKey)
-
-
 
 	if err != nil {
 		fmt.Errorf("Something Went Wrong: %s", err.Error())
