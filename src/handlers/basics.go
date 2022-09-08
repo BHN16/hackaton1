@@ -204,14 +204,11 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		case "doctor":
 
 			var doctor models.Employee
-			err3 := json.NewDecoder(r.Body).Decode(&doctor)
-			fmt.Println("HOLA")
-
-			if err3 == nil {
-				http.Error(w, "Error en los datos recibidos"+err.Error(), 400)
-				return
-			}
-			fmt.Println(doctor.Password)
+			doctor.Name = user.Name
+			doctor.Codigo = user.Codigo
+			doctor.Email = user.Email
+			doctor.Password = user.Password
+			//err3 := json.NewDecoder(r.Body).Decode(&doctor)
 
 			err2 := validateEntropy(doctor.Password)
 
@@ -231,20 +228,19 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		case "patient":
 
 			var patient models.Patient
-			err3 := json.NewDecoder(r.Body).Decode(&patient)
-			if err3 != nil {
-				http.Error(w, "Error en los datos recibidos"+err.Error(), 400)
-				return
-			}
 
-			err2 := validateEntropy(user.Password)
+			patient.Name = user.Name
+			patient.Email = user.Email
+			patient.Password = user.Password
+
+			err2 := validateEntropy(patient.Password)
 
 			if err2 != nil {
 				http.Error(w, err2.Error(), 400)
 				return
 			}
 
-			user.Password = hashAndSalt(user.Password)
+			patient.Password = hashAndSalt(patient.Password)
 
 			patient = models.Patient(patient)
 
