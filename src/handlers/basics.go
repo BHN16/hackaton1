@@ -35,11 +35,11 @@ func checkRole(tokenString string) int {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Print(claims)
+		fmt.Println(claims)
 		switch claims["Role"] {
 		case "admin":
 			return 1
-		case "doctor":
+		case "employee":
 			return 2
 		case "patient":
 			return 3
@@ -137,54 +137,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 func Register(w http.ResponseWriter, r *http.Request) {
 
-	// email, user, password, tokenstring
-
 	c, err := r.Cookie("token")
 	if err != nil {
 		if err == http.ErrNoCookie {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-
 		w.WriteHeader(http.StatusBadRequest)
-	}
-
-	//var user models.UserAuthenticate
-
-	//err := json.NewDecoder(r.Body).Decode(&user)
-
-	godotenv.Load(".env")
-
-	var mySigningKey = []byte(os.Getenv("SECRET"))
-
-	token, err := jwt.Parse(c.Value, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("There was an error in parsing")
-		}
-		return mySigningKey, nil
-	})
-
-	// Revisar los claims, estos tienen los atributos del token
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Println(claims)
-
-		switch checkRole(c.Value) {
-		case 1:
-			fmt.Println("Es admin")
-		case 2:
-			fmt.Println("Es doctor")
-		case 3:
-			fmt.Println("Es patient")
-		case 4:
-			fmt.Println("Token expirado")
-		default:
-			fmt.Println("Error en el token")
-		}
-	}
-
-	if err != nil {
-		http.Error(w, "Error en los datos recibidos"+err.Error(), 400)
-		return
 	}
 
 	var user models.TemporalUser
@@ -194,15 +153,10 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(user)
-
 	switch checkRole(c.Value) {
 	case 1:
-		fmt.Println(user)
-
 		switch user.Role {
-		case "doctor":
-
+		case "Doctor":
 			var doctor models.Employee
 			doctor.Name = user.Name
 			doctor.Codigo = user.Codigo
@@ -225,8 +179,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 			json.NewEncoder(w).Encode(&doctor)
 
-		case "patient":
-
+		case "Patient":
+			fmt.Println("Entramos a paciente")
 			var patient models.Patient
 
 			patient.Name = user.Name
@@ -252,11 +206,9 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 		default:
 			json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role"})
-
 		}
-
 	case 2:
-		fmt.Println("Es doctor")
+		fmt.Println("Es employee")
 	case 3:
 		fmt.Println("Es patient")
 	case 4:
@@ -264,51 +216,4 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	default:
 		fmt.Println("Error en el token")
 	}
-
-	/*
-		switch user.Role {
-		case "Employee":
-			var employee models.Employee
-
-			err2 := validateEntropy(user.Password)
-
-			if err2 != nil {
-				http.Error(w, err2.Error(), 400)
-				return
-			}
-
-			user.Password = hashAndSalt(user.Password)
-
-			employee = models.Employee(user)
-
-			bd.DB.AutoMigrate(&models.Employee{})
-
-			bd.DB.Create(&employee)
-
-			json.NewEncoder(w).Encode(&employee)
-
-		case "Patient":
-			err2 := validateEntropy(user.Password)
-
-			if err2 != nil {
-				http.Error(w, err2.Error(), 400)
-				return
-			}
-
-			user.Password = hashAndSalt(user.Password)
-
-			var patient models.Patient
-
-			patient = models.Patient(user)
-
-			bd.DB.AutoMigrate(&models.Patient{})
-
-			bd.DB.Create(&patient)
-
-			json.NewEncoder(w).Encode(&patient)
-		default:
-			json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role"})
-
-		}
-	*/
 }
