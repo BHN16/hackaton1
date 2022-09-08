@@ -127,20 +127,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	// email, user, password, tokenstring
 
-	var user models.UserAuthenticate
-
-	err := json.NewDecoder(r.Body).Decode(&user)
-
-	if err != nil {
-		http.Error(w, "Error en los datos recibidos"+err.Error(), 400)
-		return
-	}
-
-	//Deserializar el Token, verificar si es admin. Si es admin tu puedes crear employee y patient
-
-	fmt.Print("Ingresando a register\n")
-
 	godotenv.Load(".env")
+
 
 	var mySigningKey = []byte(os.Getenv("SECRET"))
 
@@ -161,7 +149,22 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	fmt.Print("\nFin de register")
+
+	var user models.UserAuthenticate
+
+	err := json.NewDecoder(r.Body).Decode(&user)
+
+	if err != nil {
+		http.Error(w, "Error en los datos recibidos"+err.Error(), 400)
+		return
+	}
+
+
+
+
+
+	
+
 
 	/*
 		switch user.Role {
