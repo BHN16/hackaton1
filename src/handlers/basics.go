@@ -8,6 +8,7 @@ import (
 	"hackaton/models"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/joho/godotenv"
@@ -30,7 +31,7 @@ func checkRole(tokenString string) int {
 	})
 
 	if err != nil {
-		return 3
+		return 4
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
@@ -38,8 +39,10 @@ func checkRole(tokenString string) int {
 		switch claims["Role"] {
 		case "admin":
 			return 1
-		case "user":
+		case "doctor":
 			return 2
+		case "patient":
+			return 3
 		default:
 			return 0
 		}
@@ -64,18 +67,20 @@ func setRole(user *models.User, admin *models.Admin, employee *models.Employee, 
 	return "", errors.New("Invalid username or password")
 }
 
-func generateToken(user *models.User) (models.Token, error) {
+func generateToken(user *models.User) (string, error) {
 	validToken, err := GenerateJWT(user.Email, user.Role)
 	if err != nil {
-		return models.Token{}, err
+		return "", err
 	}
 
-	var token models.Token
-	token.Email = user.Email
-	token.Role = user.Role
-	token.TokenString = validToken
+	/*
 
-	return token, nil
+		var token models.Token
+		token.Email = user.Email
+		token.Role = user.Role
+		token.TokenString = validToken
+	*/
+	return validToken, nil
 }
 
 func InitializeDB(w http.ResponseWriter, r *http.Request) {
@@ -118,22 +123,41 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(err)
 	} else {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(token)
+
+		http.SetCookie(w, &http.Cookie{
+			Name:    "token",
+			Value:   token,
+			Expires: time.Now().Add(time.Minute * 5),
+		})
+
+		//w.Header().Set("Content-Type", "application/json")
+		//json.NewEncoder(w).Encode(token)
 	}
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
 
-<<<<<<< HEAD
 	// email, user, password, tokenstring
+
+	c, err := r.Cookie("token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	//var user models.UserAuthenticate
+
+	//err := json.NewDecoder(r.Body).Decode(&user)
 
 	godotenv.Load(".env")
 
-
 	var mySigningKey = []byte(os.Getenv("SECRET"))
 
-	token, err := jwt.Parse(user.TokenString, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(c.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("There was an error in parsing")
 		}
@@ -142,34 +166,109 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	// Revisar los claims, estos tienen los atributos del token
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Print(claims)
-		if claims["Role"] == "admin" {
-			fmt.Print("es admin")
-		} else if claims["Role"] == "user" {
-			fmt.Print("es usuario")
+		fmt.Println(claims)
+
+		switch checkRole(c.Value) {
+		case 1:
+			fmt.Println("Es admin")
+		case 2:
+			fmt.Println("Es doctor")
+		case 3:
+			fmt.Println("Es patient")
+		case 4:
+			fmt.Println("Token expirado")
+		default:
+			fmt.Println("Error en el token")
 		}
 	}
-
-
-	var user models.UserAuthenticate
-
-	err := json.NewDecoder(r.Body).Decode(&user)
 
 	if err != nil {
 		http.Error(w, "Error en los datos recibidos"+err.Error(), 400)
 		return
 	}
 
-	switch checkRole(user.TokenString) {
-	case 1:
-		fmt.Print("Es admin")
-	case 2:
-		fmt.Print("Es user")
-	case 3:
-		fmt.Print("Token expirado")
-	default:
-		fmt.Print("Error en el token")
+	var user models.TemporalUser
+	err2 := json.NewDecoder(r.Body).Decode(&user)
+	if err2 != nil {
+		http.Error(w, "Error en los datos recibidos"+err.Error(), 400)
+		return
 	}
+
+	fmt.Println(user)
+
+	switch checkRole(c.Value) {
+	case 1:
+		fmt.Println(user)
+
+		switch user.Role {
+		case "doctor":
+
+			var doctor models.Employee
+			err3 := json.NewDecoder(r.Body).Decode(&doctor)
+			fmt.Println("HOLA")
+
+			if err3 == nil {
+				http.Error(w, "Error en los datos recibidos"+err.Error(), 400)
+				return
+			}
+			fmt.Println(doctor.Password)
+
+			err2 := validateEntropy(doctor.Password)
+
+			if err2 != nil {
+				http.Error(w, err2.Error(), 400)
+				return
+			}
+
+			doctor.Password = hashAndSalt(doctor.Password)
+
+			bd.DB.AutoMigrate(&models.Employee{})
+
+			bd.DB.Create(&doctor)
+
+			json.NewEncoder(w).Encode(&doctor)
+
+		case "patient":
+
+			var patient models.Patient
+			err3 := json.NewDecoder(r.Body).Decode(&patient)
+			if err3 != nil {
+				http.Error(w, "Error en los datos recibidos"+err.Error(), 400)
+				return
+			}
+
+			err2 := validateEntropy(user.Password)
+
+			if err2 != nil {
+				http.Error(w, err2.Error(), 400)
+				return
+			}
+
+			user.Password = hashAndSalt(user.Password)
+
+			patient = models.Patient(patient)
+
+			bd.DB.AutoMigrate(&models.Patient{})
+
+			bd.DB.Create(&patient)
+
+			json.NewEncoder(w).Encode(&patient)
+
+		default:
+			json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role"})
+
+		}
+
+	case 2:
+		fmt.Println("Es doctor")
+	case 3:
+		fmt.Println("Es patient")
+	case 4:
+		fmt.Println("Token expirado")
+	default:
+		fmt.Println("Error en el token")
+	}
+
 	/*
 		switch user.Role {
 		case "Employee":

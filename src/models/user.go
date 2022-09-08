@@ -23,3 +23,15 @@ type UserAuthenticate struct {
 
 	TokenString string `json: "TokenString"`
 }
+
+type TemporalUser struct {
+	Name string `json:"Name"`
+
+	Role string `json:"Role"`
+
+	Email string `json:"Email"`
+
+	Password string `json:"Password"`
+
+	Codigo string `json:"Codigo"`
+}
