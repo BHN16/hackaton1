@@ -20,7 +20,6 @@ func GenerateJWT(email, role string) (string, error) {
 	godotenv.Load(".env")
 
 	var mySigningKey = []byte(os.Getenv("SECRET"))
-	fmt.Print(os.Getenv("SECRET"))
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 
@@ -42,10 +41,10 @@ func comparePasswords(hashedPwd string, plainPwd string) bool {
 	byteHash := []byte(hashedPwd)
 	err := bcrypt.CompareHashAndPassword(byteHash, []byte(plainPwd))
 	if err != nil {
+		fmt.Println(plainPwd)
 		log.Println(err)
 		return false
 	}
-
 	return true
 }
 

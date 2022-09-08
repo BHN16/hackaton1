@@ -39,6 +39,8 @@ func main() {
 
 		}).Methods("GET")*/
 
+	router.HandleFunc("/", handlers.InitializeDB).Methods("POST")
+
 	router.HandleFunc("/employees", handlers.GetEmployees).Methods("GET")
 
 	router.HandleFunc("/employee/{id}", handlers.GetEmployee).Methods("GET")
