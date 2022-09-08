@@ -7,7 +7,7 @@ type Employee struct {
 
 	Name string `json:"Name"`
 
-	Email string `json:"Email"`
+	Email string `json:"Email" gorm:"primaryKey"`
 
 	Password string `json:"Password"`
 
