@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"hackaton/bd"
 	"hackaton/models"
@@ -12,9 +13,86 @@ import (
 	"github.com/joho/godotenv"
 )
 
+func checkRole(tokenString string) int {
+	if tokenString == "" {
+		return 0
+	}
+
+	godotenv.Load(".env")
+
+	var mySigningKey = []byte(os.Getenv("SECRET"))
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("There was an error in parsing")
+		}
+		return mySigningKey, nil
+	})
+
+	if err != nil {
+		return 3
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		fmt.Print(claims)
+		switch claims["Role"] {
+		case "admin":
+			return 1
+		case "user":
+			return 2
+		default:
+			return 0
+		}
+	}
+	return 0
+}
+
+func setRole(user *models.User, admin *models.Admin, employee *models.Employee, patient *models.Patient) (string, error) {
+	if admin.Email != "" {
+		if user.Email == admin.Email && comparePasswords(admin.Password, user.Password) {
+			return "admin", nil
+		}
+	} else if employee.Email != "" {
+		if user.Email == employee.Email && comparePasswords(employee.Password, user.Password) {
+			return "employee", nil
+		}
+	} else if patient.Email != "" {
+		if user.Email == patient.Email && comparePasswords(patient.Password, user.Password) {
+			return "patient", nil
+		}
+	}
+	return "", errors.New("Invalid username or password")
+}
+
+func generateToken(user *models.User) (models.Token, error) {
+	validToken, err := GenerateJWT(user.Email, user.Role)
+	if err != nil {
+		return models.Token{}, err
+	}
+
+	var token models.Token
+	token.Email = user.Email
+	token.Role = user.Role
+	token.TokenString = validToken
+
+	return token, nil
+}
+
+func InitializeDB(w http.ResponseWriter, r *http.Request) {
+	bd.DB.AutoMigrate(&models.Admin{})
+	bd.DB.AutoMigrate(&models.Employee{})
+	bd.DB.AutoMigrate(&models.Medicine{})
+	bd.DB.AutoMigrate(&models.Patient{})
+	bd.DB.AutoMigrate(&models.Receipt{})
+}
+
 func Login(w http.ResponseWriter, r *http.Request) {
 
 	var user models.User
+	var admin models.Admin
+	var employee models.Employee
+	var patient models.Patient
+
 	err := json.NewDecoder(r.Body).Decode(&user)
 
 	if err != nil {
@@ -22,110 +100,30 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var admin models.Admin
-	var employee models.Employee
-	var patient models.Patient
-
-	// Models to know the table where the query will be executed and to store the result.
-	/*
-		bd.DB.Where("email = ?", user.Email).Find(&admin)
-		bd.DB.Where("email = ?", user.Email).Find(&admin)
-		bd.DB.Where("email = ?", user.Email).Find(&admin)
-	*/
 	bd.DB.Find(&admin, "Email = ?", user.Email)
 	bd.DB.Find(&employee, "Email = ?", user.Email)
 	bd.DB.Find(&patient, "Email = ?", user.Email)
-	/*
-		json.NewEncoder(w).Encode(&admin)
-		json.NewEncoder(w).Encode(&employee)
-		json.NewEncoder(w).Encode(&patient)*/
 
-	// Check if the user in the database is admin, employee or patient and assign its role.
-	if admin.Email != "" {
-		if admin.Email == user.Email && comparePasswords(admin.Password, user.Password) {
-			user.Role = "admin"
-			//json.NewEncoder(w).Encode(map[string]bool{"response": true})
-		} else {
-			json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Username or Password"})
-		}
-	} else if employee.Email != "" {
-		if employee.Email == user.Email && comparePasswords(employee.Password, user.Password) {
-			user.Role = "employee"
-			//json.NewEncoder(w).Encode(map[string]bool{"response": true})
-		} else {
-			json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Username or Password"})
-		}
-	} else if patient.Email != "" {
-		if patient.Email == user.Email && comparePasswords(patient.Password, user.Password) {
-			user.Role = "patient"
-			//json.NewEncoder(w).Encode(map[string]bool{"response": true})
-		} else {
-			json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Username or Password"})
-		}
-	} else {
+	assignedRole, err := setRole(&user, &admin, &employee, &patient)
+
+	if err != nil {
 		json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Username or Password"})
+	} else {
+		user.Role = assignedRole
 	}
 
-	// Generate the jwt with its role.
+	token, err := generateToken(&user)
 
-	validToken, err := GenerateJWT(user.Email, user.Role)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(err)
-		return
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(token)
 	}
-
-	var token models.Token
-	token.Email = user.Email
-	token.Role = user.Role
-	token.TokenString = validToken
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(token)
-
-	/*
-
-		switch user.Role {
-		case "Admin":
-			var admin models.Admin
-			bd.DB.First(&admin)
-
-			if admin.Email == user.Email && comparePasswords(admin.Password, user.Password) {
-				json.NewEncoder(w).Encode(map[string]bool{"response": true})
-			} else {
-				json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Username or Password"})
-			}
-
-		case "Employee":
-			var employee models.Employee
-			bd.DB.Find(&employee, "Email = ?", user.Email)
-
-			if employee.Email == user.Email && comparePasswords(employee.Password, user.Password) {
-				json.NewEncoder(w).Encode(map[string]bool{"response": true})
-			} else {
-				json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Username or Password"})
-			}
-
-		case "Patient":
-			var patient models.Patient
-			bd.DB.Find(&patient, "Email = ?", user.Email)
-
-			if patient.Email == user.Email && comparePasswords(patient.Password, user.Password) {
-				json.NewEncoder(w).Encode(map[string]bool{"response": true})
-			} else {
-				json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Username or Password"})
-			}
-
-		default:
-			json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role"})
-
-		}
-	*/
-
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
-
-	// email, user, password, tokenstring
 
 	var user models.UserAuthenticate
 
@@ -136,33 +134,16 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Deserializar el Token, verificar si es admin. Si es admin tu puedes crear employee y patient
-
-	fmt.Print("Ingresando a register\n")
-
-	godotenv.Load(".env")
-
-	var mySigningKey = []byte(os.Getenv("SECRET"))
-
-	token, err := jwt.Parse(user.TokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("There was an error in parsing")
-		}
-		return mySigningKey, nil
-	})
-
-	// Revisar los claims, estos tienen los atributos del token
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Print(claims)
-		if claims["Role"] == "admin" {
-			fmt.Print("es admin")
-		} else if claims["Role"] == "user" {
-			fmt.Print("es usuario")
-		}
+	switch checkRole(user.TokenString) {
+	case 1:
+		fmt.Print("Es admin")
+	case 2:
+		fmt.Print("Es user")
+	case 3:
+		fmt.Print("Token expirado")
+	default:
+		fmt.Print("Error en el token")
 	}
-
-	fmt.Print("\nFin de register")
-
 	/*
 		switch user.Role {
 		case "Employee":
@@ -209,5 +190,4 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 		}
 	*/
-
 }
