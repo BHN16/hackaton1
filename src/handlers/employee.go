@@ -11,6 +11,24 @@ import (
 
 func GetEmployees(w http.ResponseWriter, r *http.Request) {
 
+	role, err := processCookie(r)
+
+	if err != nil {
+		if err == http.ErrNoCookie {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{"response": "No cookie"})
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"response": "Bad request"})
+		return
+	}
+
+	if role != 1 {
+		json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role"})
+		return
+	}
+
 	var employees []models.Employee
 
 	bd.DB.Find(&employees)
@@ -20,6 +38,24 @@ func GetEmployees(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetEmployee(w http.ResponseWriter, r *http.Request) {
+
+	role, err := processCookie(r)
+
+	if err != nil {
+		if err == http.ErrNoCookie {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{"response": "No cookie"})
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"response": "Bad request"})
+		return
+	}
+	// CHECK FOR THE CASE OF CURRENTEMPLOYEE
+	if role != 1 {
+		json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role"})
+		return
+	}
 
 	params := mux.Vars(r)
 
@@ -31,20 +67,27 @@ func GetEmployee(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func PostEmployee(w http.ResponseWriter, r *http.Request) {
+func PostEmployee(user *models.TemporalUser) (*models.Employee, error) {
 
-	var employee models.Employee
-	err := json.NewDecoder(r.Body).Decode(&employee)
+	var doctor models.Employee
+
+	doctor.Name = user.Name
+	doctor.Codigo = user.Codigo
+	doctor.Email = user.Email
+	doctor.Password = user.Password
+
+	err := validateEntropy(doctor.Password)
 
 	if err != nil {
-		http.Error(w, "Error en los datos recibidos"+err.Error(), 400)
-		return
+		return nil, err
 	}
+
+	doctor.Password = hashAndSalt(doctor.Password)
 
 	bd.DB.AutoMigrate(&models.Employee{})
 
-	bd.DB.Create(&employee)
+	bd.DB.Create(&doctor)
 
-	json.NewEncoder(w).Encode(&employee)
-
+	return &doctor, nil
+	// json.NewEncoder(w).Encode(&employee)
 }

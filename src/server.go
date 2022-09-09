@@ -19,32 +19,41 @@ func main() {
 
 	bd.Connect()
 
-	router.HandleFunc("/employees", handlers.GetEmployees).Methods("GET")
+	router.HandleFunc("/", handlers.InitializeDB).Methods("POST")
 
-	router.HandleFunc("/employee/{id}", handlers.GetEmployee).Methods("GET")
+	router.HandleFunc("/employees", handlers.GetEmployees).Methods("GET") //Admin
 
-	router.HandleFunc("/employee", handlers.PostEmployee).Methods("POST")
+	router.HandleFunc("/employee/{id}", handlers.GetEmployee).Methods("GET") //Admin - (CurrentEmployee)?
 
-	router.HandleFunc("/medicines", handlers.GetMedicines).Methods("GET")
+	//router.HandleFunc("/employee", handlers.PostEmployee).Methods("POST")   //
 
-	router.HandleFunc("/medicine/{id}", handlers.GetMedicine).Methods("GET")
+	router.HandleFunc("/medicines", handlers.GetMedicines).Methods("GET") //Admin - Employees
 
-	router.HandleFunc("/medicine", handlers.PostMedicine).Methods("POST")
+	router.HandleFunc("/medicine/{id}", handlers.GetMedicine).Methods("GET") //Admin - Employees
 
-	router.HandleFunc("/patients", handlers.GetPatients).Methods("GET")
+	router.HandleFunc("/medicine", handlers.PostMedicine).Methods("POST") //Admin
 
-	router.HandleFunc("/patient/{id}", handlers.GetPatient).Methods("GET")
+	router.HandleFunc("/patients", handlers.GetPatients).Methods("GET") //Admin - Employees
 
-	router.HandleFunc("/patient", handlers.PostPatient).Methods("POST")
+	router.HandleFunc("/patient/{id}", handlers.GetPatient).Methods("GET") //Admin - Employees - (CurrentPatient)?
 
-	router.HandleFunc("/admin", handlers.GetAdmin).Methods("GET")
+	//ruta para crear recetas --> Admin - Employees
 
-	router.HandleFunc("/admin", handlers.PostAdmin).Methods("POST")
+	//ruta para ver todas las recetas de un usuario --> Admin - Employee - CurrentPatient
+
+	//router.HandleFunc("/patient", handlers.PostPatient).Methods("POST")
+
+	router.HandleFunc("/admin", handlers.GetAdmin).Methods("GET") //DEBEMOS BORRARLO
+
+	router.HandleFunc("/admin", handlers.PostAdmin).Methods("POST") //DEBEMOS BORRARLO
+
+	router.HandleFunc("/login", handlers.Login).Methods("POST") //TO-DOS
+
+	router.HandleFunc("/register", handlers.Register).Methods("POST") //ADMIN
 
 	handler := cors.Default().Handler(router)
 
-		log.Fatal(http.ListenAndServe("10.182.0.4:8080", handler))
+	log.Fatal(http.ListenAndServeTLS("10.182.0.4:8080","cert.pem","privkey.pem", handler))
 
-		defer bd.DB.Close()
 
 	}
