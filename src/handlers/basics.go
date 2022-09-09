@@ -39,7 +39,7 @@ func checkRole(tokenString string) int {
 		switch claims["Role"] {
 		case "admin":
 			return 1
-		case "employee":
+		case "doctor":
 			return 2
 		case "patient":
 			return 3
@@ -57,7 +57,7 @@ func setRole(user *models.User, admin *models.Admin, employee *models.Employee, 
 		}
 	} else if employee.Email != "" {
 		if user.Email == employee.Email && comparePasswords(employee.Password, user.Password) {
-			return "employee", nil
+			return "doctor", nil
 		}
 	} else if patient.Email != "" {
 		if user.Email == patient.Email && comparePasswords(patient.Password, user.Password) {
@@ -72,14 +72,6 @@ func generateToken(user *models.User) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	/*
-
-		var token models.Token
-		token.Email = user.Email
-		token.Role = user.Role
-		token.TokenString = validToken
-	*/
 	return validToken, nil
 }
 
@@ -101,7 +93,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 
 	if err != nil {
-		http.Error(w, "Error en los datos recibidos"+err.Error(), 400)
+		http.Error(w, "Error in the data"+err.Error(), 400)
 		return
 	}
 
@@ -129,13 +121,18 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			Value:   token,
 			Expires: time.Now().Add(time.Minute * 5),
 		})
-
-		//w.Header().Set("Content-Type", "application/json")
-		//json.NewEncoder(w).Encode(token)
 	}
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
+
+	// c == *http.Cookie
+	var user models.TemporalUser
+	err2 := json.NewDecoder(r.Body).Decode(&user)
+	if err2 != nil {
+		http.Error(w, "Error in the data"+err.Error(), 400)
+		return
+	}
 
 	c, err := r.Cookie("token")
 	if err != nil {
@@ -146,23 +143,15 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
-	var user models.TemporalUser
-	err2 := json.NewDecoder(r.Body).Decode(&user)
-	if err2 != nil {
-		http.Error(w, "Error en los datos recibidos"+err.Error(), 400)
-		return
-	}
-
 	switch checkRole(c.Value) {
 	case 1:
 		switch user.Role {
-		case "Doctor":
+		case "doctor":
 			var doctor models.Employee
 			doctor.Name = user.Name
 			doctor.Codigo = user.Codigo
 			doctor.Email = user.Email
 			doctor.Password = user.Password
-			//err3 := json.NewDecoder(r.Body).Decode(&doctor)
 
 			err2 := validateEntropy(doctor.Password)
 
@@ -179,8 +168,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 			json.NewEncoder(w).Encode(&doctor)
 
-		case "Patient":
-			fmt.Println("Entramos a paciente")
+		case "patient":
 			var patient models.Patient
 
 			patient.Name = user.Name
@@ -208,7 +196,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role"})
 		}
 	case 2:
-		fmt.Println("Es employee")
+		fmt.Println("Es doctor")
 	case 3:
 		fmt.Println("Es patient")
 	case 4:

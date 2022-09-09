@@ -27,18 +27,6 @@ func main() {
 
 	bd.Connect()
 
-	/*
-		router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			person := person{Name: "hola", LastName: "adios", Age: "12"}
-
-			jsonr, _ := json.Marshal(person)
-
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			w.Write(jsonr)
-
-		}).Methods("GET")*/
-
 	router.HandleFunc("/", handlers.InitializeDB).Methods("POST")
 
 	router.HandleFunc("/employees", handlers.GetEmployees).Methods("GET") //Admin
