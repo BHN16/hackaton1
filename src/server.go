@@ -39,6 +39,10 @@ func main() {
 
 	//ruta para crear recetas --> Admin - Employees
 
+	router.HandleFunc("/receipts", handlers.GetReceipts).Methods("GET") //Admin - Employees - (CurrentPatient)?
+
+	router.HandleFunc("/receipt", handlers.PostReceipt).Methods("POST") //Admin - Employees - (CurrentPatient)?
+
 	//ruta para ver todas las recetas de un usuario --> Admin - Employee - CurrentPatient
 
 	//router.HandleFunc("/patient", handlers.PostPatient).Methods("POST")
