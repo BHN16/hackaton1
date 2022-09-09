@@ -7,4 +7,5 @@ require (
 	github.com/jinzhu/gorm v1.9.16
 	github.com/joho/godotenv v1.4.0
 	github.com/rs/cors v1.8.2
+	gorm.io/driver/postgres v1.3.9 // indirect
 )

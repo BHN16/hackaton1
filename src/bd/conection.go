@@ -6,6 +6,8 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+
 )
 
 var (
@@ -15,7 +17,7 @@ var (
 
 func Connect() {
 	godotenv.Load(".env")
-	DB, ERR = gorm.Open("postgres", os.Getenv("POSTGRES"))
+	DB, ERR = gorm.Open(postgres.Open(os.Getenv("POSTGRES")), &gnorm.Config{})
 
 	if ERR != nil {
 		panic("failed to connect database")
