@@ -130,7 +130,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	var user models.TemporalUser
 	err2 := json.NewDecoder(r.Body).Decode(&user)
 	if err2 != nil {
-		http.Error(w, "Error in the data"+err.Error(), 400)
+		http.Error(w, "Error in the data"+err2.Error(), 400)
 		return
 	}
 
