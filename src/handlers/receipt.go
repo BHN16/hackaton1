@@ -11,9 +11,45 @@ func GetReceipts(w http.ResponseWriter, r *http.Request) {
 
 	var receipts []models.Receipt
 
-	bd.DB.Find(&receipts)
+	role, err := processCookie(r)
 
-	json.NewEncoder(w).Encode(&receipts)
+	if err != nil {
+		if err == http.ErrNoCookie {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{"response": "No cookie"})
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"response": "Bad request"})
+		return
+	}
+
+	switch role {
+	case 1:
+		bd.DB.Find(&receipts)
+
+		json.NewEncoder(w).Encode(&receipts)
+	case 2:
+		c, err := r.Cookie("token")
+		if err != nil {
+			return
+		}
+		bd.DB.Find(&receipts, "Employee_Refer = ?", getEmail(c.Value))
+		json.NewEncoder(w).Encode(&receipts)
+		return
+	case 3:
+		c, err := r.Cookie("token")
+		if err != nil {
+			return
+		}
+		bd.DB.Find(&receipts, "Patient_Refer = ?", getEmail(c.Value))
+		json.NewEncoder(w).Encode(&receipts)
+		return
+	default:
+		json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role"})
+		return
+
+	}
 
 }
 

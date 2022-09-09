@@ -24,12 +24,12 @@ func GetMedicines(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var medicines []models.Medicine
+
 	if role != 1 && role != 2 {
 		json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role"})
 		return
 	}
-
-	var medicines []models.Medicine
 
 	bd.DB.Find(&medicines)
 
