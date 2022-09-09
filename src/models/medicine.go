@@ -6,4 +6,6 @@ type Medicine struct {
 	gorm.Model
 
 	Name string `json:"Name"`
+
+	Cant uint `json:"Cant"`
 }

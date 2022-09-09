@@ -14,6 +14,32 @@ import (
 	"github.com/joho/godotenv"
 )
 
+func getEmail(tokenString string) interface{} {
+	if tokenString == "" {
+		return ""
+	}
+
+	godotenv.Load(".env")
+
+	var mySigningKey = []byte(os.Getenv("SECRET"))
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("There was an error in parsing")
+		}
+		return mySigningKey, nil
+	})
+
+	if err != nil {
+		return ""
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims["Email"]
+	}
+	return ""
+}
+
 func checkRole(tokenString string) int {
 	if tokenString == "" {
 		return 0

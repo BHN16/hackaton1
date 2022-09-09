@@ -5,15 +5,17 @@ import "github.com/jinzhu/gorm"
 type Receipt struct {
 	gorm.Model
 
-	PatientRefer int
+	Cant uint `json:"Cant"`
 
-	MedicineRefer int
+	PatientRefer string `json:"Patient"`
 
-	EmployeeRefer int
+	MedicineRefer uint `json:"Medicine"`
+
+	EmployeeRefer string `json:"Employee"`
 
 	patient Patient `gorm:"foreignKey:PatientRefer"`
 
-	medicine Medicine `gorm:"foreignKey:MedicineRefer"`
-
 	employee Employee `gorm:"foreignKey:EmployeeRefer"`
+
+	medicines Medicine `gorm:"foreignKey:MedicinesRefer"`
 }
