@@ -31,7 +31,7 @@ func main() {
 
 	router.HandleFunc("/employees", handlers.GetEmployees).Methods("GET") //Admin
 
-	router.HandleFunc("/employee/{id}", handlers.GetEmployee).Methods("GET") //Admin - CurrentEmployee
+	router.HandleFunc("/employee/{id}", handlers.GetEmployee).Methods("GET") //Admin - (CurrentEmployee)?
 
 	//router.HandleFunc("/employee", handlers.PostEmployee).Methods("POST")   //
 
@@ -43,7 +43,7 @@ func main() {
 
 	router.HandleFunc("/patients", handlers.GetPatients).Methods("GET") //Admin - Employees
 
-	router.HandleFunc("/patient/{id}", handlers.GetPatient).Methods("GET") //Admin - Employees - CurrentPatient
+	router.HandleFunc("/patient/{id}", handlers.GetPatient).Methods("GET") //Admin - Employees - (CurrentPatient)?
 
 	//ruta para crear recetas --> Admin - Employees
 

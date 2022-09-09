@@ -11,6 +11,24 @@ import (
 
 func GetMedicines(w http.ResponseWriter, r *http.Request) {
 
+	role, err := processCookie(r)
+
+	if err != nil {
+		if err == http.ErrNoCookie {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{"response": "No cookie"})
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"response": "Bad request"})
+		return
+	}
+
+	if role != 1 && role != 2 {
+		json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role"})
+		return
+	}
+
 	var medicines []models.Medicine
 
 	bd.DB.Find(&medicines)
@@ -20,6 +38,24 @@ func GetMedicines(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetMedicine(w http.ResponseWriter, r *http.Request) {
+
+	role, err := processCookie(r)
+
+	if err != nil {
+		if err == http.ErrNoCookie {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{"response": "No cookie"})
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"response": "Bad request"})
+		return
+	}
+
+	if role != 1 && role != 2 {
+		json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role"})
+		return
+	}
 
 	params := mux.Vars(r)
 
@@ -33,11 +69,29 @@ func GetMedicine(w http.ResponseWriter, r *http.Request) {
 
 func PostMedicine(w http.ResponseWriter, r *http.Request) {
 
-	var medicine models.Medicine
-	err := json.NewDecoder(r.Body).Decode(&medicine)
+	role, err := processCookie(r)
 
 	if err != nil {
-		http.Error(w, "Error en los datos recibidos"+err.Error(), 400)
+		if err == http.ErrNoCookie {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{"response": "No cookie"})
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"response": "Bad request"})
+		return
+	}
+
+	if role != 1 {
+		json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role"})
+		return
+	}
+
+	var medicine models.Medicine
+	err2 := json.NewDecoder(r.Body).Decode(&medicine)
+
+	if err2 != nil {
+		http.Error(w, "Error en los datos recibidos"+err2.Error(), 400)
 		return
 	}
 

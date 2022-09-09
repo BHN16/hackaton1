@@ -50,6 +50,15 @@ func checkRole(tokenString string) int {
 	return 0
 }
 
+func processCookie(r *http.Request) (int, error) {
+	c, err := r.Cookie("token")
+	if err != nil {
+		return -1, err
+	} else {
+		return checkRole(c.Value), nil
+	}
+}
+
 func setRole(user *models.User, admin *models.Admin, employee *models.Employee, patient *models.Patient) (string, error) {
 	if admin.Email != "" {
 		if user.Email == admin.Email && comparePasswords(admin.Password, user.Password) {
@@ -107,6 +116,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Username or Password"})
 	} else {
 		user.Role = assignedRole
+		fmt.Println("Rol asignado al momento de hacer login: ", user.Role)
 	}
 
 	token, err := generateToken(&user)
@@ -126,82 +136,61 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 func Register(w http.ResponseWriter, r *http.Request) {
 
-	// c == *http.Cookie
 	var user models.TemporalUser
-	err2 := json.NewDecoder(r.Body).Decode(&user)
-	if err2 != nil {
-		http.Error(w, "Error in the data"+err2.Error(), 400)
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, "Error in the data"+err.Error(), 400)
 		return
 	}
 
-	c, err := r.Cookie("token")
-	if err != nil {
-		if err == http.ErrNoCookie {
+	role, err2 := processCookie(r)
+
+	if err2 != nil {
+		if err2 == http.ErrNoCookie {
 			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{"response": "No cookie"})
 			return
 		}
 		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"response": "Bad request"})
+		return
 	}
 
-	switch checkRole(c.Value) {
+	switch role {
 	case 1:
 		switch user.Role {
 		case "doctor":
-			var doctor models.Employee
-			doctor.Name = user.Name
-			doctor.Codigo = user.Codigo
-			doctor.Email = user.Email
-			doctor.Password = user.Password
 
-			err2 := validateEntropy(doctor.Password)
+			toEncode, err := PostEmployee(&user)
 
-			if err2 != nil {
-				http.Error(w, err2.Error(), 400)
+			if err != nil {
+				http.Error(w, err.Error(), 400)
 				return
 			}
 
-			doctor.Password = hashAndSalt(doctor.Password)
-
-			bd.DB.AutoMigrate(&models.Employee{})
-
-			bd.DB.Create(&doctor)
-
-			json.NewEncoder(w).Encode(&doctor)
+			json.NewEncoder(w).Encode(toEncode)
 
 		case "patient":
-			var patient models.Patient
 
-			patient.Name = user.Name
-			patient.Email = user.Email
-			patient.Password = user.Password
+			toEncode, err := PostPatient(&user)
 
-			err2 := validateEntropy(patient.Password)
-
-			if err2 != nil {
-				http.Error(w, err2.Error(), 400)
+			if err != nil {
+				http.Error(w, err.Error(), 400)
 				return
 			}
 
-			patient.Password = hashAndSalt(patient.Password)
-
-			patient = models.Patient(patient)
-
-			bd.DB.AutoMigrate(&models.Patient{})
-
-			bd.DB.Create(&patient)
-
-			json.NewEncoder(w).Encode(&patient)
+			json.NewEncoder(w).Encode(toEncode)
 
 		default:
 			json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role"})
 		}
 	case 2:
-		fmt.Println("Es doctor")
+		json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role-Doctor"})
 	case 3:
-		fmt.Println("Es patient")
+		json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role-Patient"})
 	case 4:
-		fmt.Println("Token expirado")
+		json.NewEncoder(w).Encode(map[string]string{"response": "Expired token"})
 	default:
-		fmt.Println("Error en el token")
+		json.NewEncoder(w).Encode(map[string]string{"response": "Token error"})
 	}
 }
