@@ -119,6 +119,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Rol asignado al momento de hacer login: ", user.Role)
 	}
 
+	fmt.Println(user)
+
 	token, err := generateToken(&user)
 
 	if err != nil {
@@ -185,7 +187,20 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role"})
 		}
 	case 2:
-		json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role-Doctor"})
+		switch user.Role {
+		case "patient":
+			toEncode, err := PostPatient(&user)
+
+			if err != nil {
+				http.Error(w, err.Error(), 400)
+				return
+			}
+
+			json.NewEncoder(w).Encode(toEncode)
+
+		default:
+			json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role-Doctor"})
+		}
 	case 3:
 		json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role-Patient"})
 	case 4:

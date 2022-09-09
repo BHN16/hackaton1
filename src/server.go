@@ -6,18 +6,10 @@ import (
 	"log"
 	"net/http"
 
-	//"github.com/golang-jwt/jwt"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 )
-
-/*
-type person struct {
-	Name     string
-	LastName string
-	Age      string
-}*/
 
 func main() {
 
