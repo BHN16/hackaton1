@@ -25,8 +25,6 @@ func main() {
 
 	router.HandleFunc("/employee/{id}", handlers.GetEmployee).Methods("GET") //Admin - (CurrentEmployee)?
 
-	//router.HandleFunc("/employee", handlers.PostEmployee).Methods("POST")   //
-
 	router.HandleFunc("/medicines", handlers.GetMedicines).Methods("GET") //Admin - Employees
 
 	router.HandleFunc("/medicine/{id}", handlers.GetMedicine).Methods("GET") //Admin - Employees
@@ -37,23 +35,17 @@ func main() {
 
 	router.HandleFunc("/patient/{id}", handlers.GetPatient).Methods("GET") //Admin - Employees - (CurrentPatient)?
 
-	//ruta para crear recetas --> Admin - Employees
-
 	router.HandleFunc("/receipts", handlers.GetReceipts).Methods("GET") //Admin - Employees - (CurrentPatient)?
 
 	router.HandleFunc("/receipt", handlers.PostReceipt).Methods("POST") //Admin - Employees - (CurrentPatient)?
 
-	//ruta para ver todas las recetas de un usuario --> Admin - Employee - CurrentPatient
-
-	//router.HandleFunc("/patient", handlers.PostPatient).Methods("POST")
-
-	router.HandleFunc("/admin", handlers.GetAdmin).Methods("GET") //DEBEMOS BORRARLO
-
-	router.HandleFunc("/admin", handlers.PostAdmin).Methods("POST") //DEBEMOS BORRARLO
-
 	router.HandleFunc("/login", handlers.Login).Methods("POST") //TO-DOS
 
 	router.HandleFunc("/register", handlers.Register).Methods("POST") //ADMIN
+
+	router.HandleFunc("/keepalive", handlers.Keepalive).Methods("GET")
+
+	router.HandleFunc("/heartbeat", handlers.Heartbeat).Methods("GET")
 
 	handler := cors.Default().Handler(router)
 

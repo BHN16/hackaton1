@@ -14,6 +14,21 @@ import (
 	"github.com/joho/godotenv"
 )
 
+func Keepalive(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(map[string]string{"response": "ALIVE"})
+
+}
+
+func Heartbeat(w http.ResponseWriter, r *http.Request) {
+	var employee models.Employee
+	result := bd.DB.First(&employee)
+	if result.Error != nil {
+		json.NewEncoder(w).Encode(map[string]string{"response": "DATABASE DIE"})
+		return
+	}
+	json.NewEncoder(w).Encode(map[string]string{"response": "DATABASE LIVE"})
+}
+
 func getEmail(tokenString string) interface{} {
 	if tokenString == "" {
 		return ""
