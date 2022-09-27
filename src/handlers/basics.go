@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"hackaton/bd"
 	"hackaton/models"
+	"log"
 	"net/http"
 	"os"
 
@@ -21,18 +22,19 @@ func InitializeDB(w http.ResponseWriter, r *http.Request) {
 }
 
 func Keepalive(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(map[string]string{"response": "ALIVE"})
-
+	json.NewEncoder(w).Encode(map[string]string{"INFO": "ALIVE"})
 }
 
 func Heartbeat(w http.ResponseWriter, r *http.Request) {
 	var employee models.Employee
 	result := bd.DB.First(&employee)
 	if result.Error != nil {
-		json.NewEncoder(w).Encode(map[string]string{"response": "DATABASE DIE"})
+		w.WriteHeader(500)
+		log.Println("ERROR: NO CONECTION DATABASE") // LOG level: (Warning, Error, Info, Debug)+..
+		json.NewEncoder(w).Encode(map[string]string{"ERROR": "NO CONECTION DATABASE"})
 		return
 	}
-	json.NewEncoder(w).Encode(map[string]string{"response": "DATABASE LIVE"})
+	json.NewEncoder(w).Encode(map[string]string{"INFO": "DATABASE LIVE"})
 }
 
 func getEmail(tokenString string) interface{} {
@@ -76,4 +78,8 @@ func generateToken(user *models.User) (string, error) {
 		return "", err
 	}
 	return validToken, nil
+}
+
+func LogTest(w http.ResponseWriter, r *http.Request) {
+	log.Printf("ERROR test")
 }

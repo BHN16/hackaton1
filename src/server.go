@@ -47,6 +47,8 @@ func main() {
 
 	router.HandleFunc("/heartbeat", handlers.Heartbeat).Methods("GET")
 
+	router.HandleFunc("/logtest", handlers.LogTest).Methods("GET")
+
 	handler := cors.Default().Handler(router)
 
 	log.Fatal(http.ListenAndServe("0.0.0.0:8080", handler))
