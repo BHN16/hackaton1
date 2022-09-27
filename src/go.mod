@@ -8,6 +8,7 @@ require (
 	github.com/jinzhu/gorm v1.9.16
 	github.com/joho/godotenv v1.4.0
 	github.com/rs/cors v1.8.2
+	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/wagslane/go-password-validator v0.3.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	gorm.io/driver/postgres v1.3.9

@@ -47,6 +47,8 @@ func main() {
 
 	router.HandleFunc("/heartbeat", handlers.Heartbeat).Methods("GET")
 
+	router.HandleFunc("/logtest", handlers.LogTest).Methods("GET")
+
 	handler := cors.Default().Handler(router)
 
 	log.Fatal(http.ListenAndServeTLS("10.182.0.4:8080","cert.pem","privkey.pem", handler))
