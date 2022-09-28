@@ -1,3 +1,8 @@
 INFO: 2022/09/28 15:43:37 basics.go:38: DATABASE LIVE
 ERROR: 2022/09/28 15:43:49 basics.go:34: NO CONECTION DATABASE
 INFO: 2022/09/28 15:44:17 basics.go:25: ALIVE
+ERROR: 2022/09/28 18:01:39 medicine.go:77: Transaction Error http: named cookie not present
+ERROR: 2022/09/28 18:03:22 medicine.go:79: No coockie
+ERROR: 2022/09/28 18:03:38 medicine.go:106: Transaction Error {{0 0001-01-01 00:00:00 +0000 UTC 0001-01-01 00:00:00 +0000 UTC <nil>} Alpha 100}
+ERROR: 2022/09/28 18:05:23 medicine.go:106: Transaction Error &{0xc000004060 <nil> <nil> false true {0 0} true false false 0xc7fa80}
+ERROR: 2022/09/28 18:11:03 medicine.go:107: Transaction Error {"ID":0,"CreatedAt":"0001-01-01T00:00:00Z","UpdatedAt":"0001-01-01T00:00:00Z","DeletedAt":null,"Name":"Alpha","Cant":100}
