@@ -22,6 +22,7 @@ func InitializeDB(w http.ResponseWriter, r *http.Request) {
 }
 
 func Keepalive(w http.ResponseWriter, r *http.Request) {
+	InfoLogger.Println("ALIVE")
 	json.NewEncoder(w).Encode(map[string]string{"INFO": "ALIVE"})
 }
 
@@ -30,10 +31,11 @@ func Heartbeat(w http.ResponseWriter, r *http.Request) {
 	result := bd.DB.First(&employee)
 	if result.Error != nil {
 		w.WriteHeader(500)
-		log.Println("ERROR: NO CONECTION DATABASE") // LOG level: (Warning, Error, Info, Debug)+..
+		ErrorLogger.Println("NO CONECTION DATABASE")
 		json.NewEncoder(w).Encode(map[string]string{"ERROR": "NO CONECTION DATABASE"})
 		return
 	}
+	InfoLogger.Println("DATABASE LIVE")
 	json.NewEncoder(w).Encode(map[string]string{"INFO": "DATABASE LIVE"})
 }
 

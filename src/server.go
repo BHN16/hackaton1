@@ -19,6 +19,8 @@ func main() {
 
 	bd.Connect()
 
+	handlers.LogInit()
+
 	router.HandleFunc("/", handlers.InitializeDB).Methods("POST")
 
 	router.HandleFunc("/employees", handlers.GetEmployees).Methods("GET") //Admin
