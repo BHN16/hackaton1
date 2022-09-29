@@ -58,11 +58,32 @@ func PostReceipt(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+        var err_demo bool = true
 
 	var receipt models.Receipt
 	var employee models.Employee
 	var patient models.Patient
 	var medicine models.Medicine
+
+
+
+        if err_demo {
+                var tempreceipt models.TempReceipt
+                err3 := json.NewDecoder(r.Body).Decode(&tempreceipt)
+                if err3 == nil{
+                        w.WriteHeader(http.StatusBadRequest)
+                        dataLog, _ := json.Marshal(tempreceipt)
+                        //dataLog, _ := r.Body
+                        ErrorLogger.Println("Transaction Error", string(dataLog))
+                        json.NewEncoder(w).Encode(map[string]string{"response": "Transaction Error"})
+                        return
+                }
+        }
+
+
+
+
+
 	err1 := json.NewDecoder(r.Body).Decode(&receipt)
 
 	if err1 != nil {

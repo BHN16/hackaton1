@@ -5,7 +5,6 @@ import (
 	"hackaton/bd"
 	"hackaton/models"
 	"net/http"
-
 	"github.com/gorilla/mux"
 )
 
@@ -69,7 +68,7 @@ func GetMedicine(w http.ResponseWriter, r *http.Request) {
 
 func PostMedicine(w http.ResponseWriter, r *http.Request) {
 
-	var err_demo bool = true
+	var err_demo bool = false
 
 	role, err := processCookie(r)
 
@@ -86,6 +85,21 @@ func PostMedicine(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+
+	if err_demo {
+		var tempmedicine models.TempMedicine
+		err3 := json.NewDecoder(r.Body).Decode(&tempmedicine)
+		if err3 == nil{
+			w.WriteHeader(http.StatusBadRequest)
+			dataLog, _ := json.Marshal(tempmedicine)
+			//dataLog, _ := r.Body
+			ErrorLogger.Println("Transaction Error", string(dataLog))
+			json.NewEncoder(w).Encode(map[string]string{"response": "Transaction Error"})
+			return
+		}
+	}
+
+
 	if role != 1 {
 		ErrorLogger.Println("Invalid Role")
 		json.NewEncoder(w).Encode(map[string]string{"response": "Invalid Role"})
@@ -98,14 +112,6 @@ func PostMedicine(w http.ResponseWriter, r *http.Request) {
 	if err2 != nil {
 		ErrorLogger.Println("Error en los datos recibidos", err2)
 		http.Error(w, "Error en los datos recibidos"+err2.Error(), 400)
-		return
-	}
-
-	if err_demo {
-		w.WriteHeader(http.StatusBadRequest)
-		dataLog, _ := json.Marshal(medicine)
-		ErrorLogger.Println("Transaction Error", string(dataLog))
-		json.NewEncoder(w).Encode(map[string]string{"response": "Transaction Error"})
 		return
 	}
 

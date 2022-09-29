@@ -9,3 +9,9 @@ type Medicine struct {
 
 	Cant uint `json:"Cant"`
 }
+type TempMedicine struct {
+
+	Name string `json:"Name"`
+
+	Cant uint `json:"Cant"`
+}

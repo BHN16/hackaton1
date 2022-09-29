@@ -12,5 +12,5 @@ require (
 	github.com/wagslane/go-password-validator v0.3.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	gorm.io/driver/postgres v1.3.9
-	gorm.io/gorm v1.23.7 // indirect
+	gorm.io/gorm v1.23.7
 )

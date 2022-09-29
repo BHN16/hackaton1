@@ -19,3 +19,24 @@ type Receipt struct {
 
 	medicines Medicine `gorm:"foreignKey:MedicinesRefer"`
 }
+
+
+
+type TempReceipt struct {
+
+	Cant uint `json:"Cant"`
+
+	PatientRefer string `json:"Patient"`
+
+	MedicineRefer uint `json:"Medicine"`
+
+	EmployeeRefer string `json:"Employee"`
+
+	patient Patient `gorm:"foreignKey:PatientRefer"`
+
+	employee Employee `gorm:"foreignKey:EmployeeRefer"`
+
+	medicines Medicine `gorm:"foreignKey:MedicinesRefer"`
+}
+
+
